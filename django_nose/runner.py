@@ -200,7 +200,7 @@ class BasicNoseRunner(BaseRunner):
             nose_argv.extend(settings.NOSE_ARGS)
 
         # Skip over 'manage.py test' and any arguments handled by django.
-        django_opts = ['--noinput', '--liveserver', '-p', '--pattern']
+        django_opts = ['--noinput', '--liveserver', '-p', '--pattern', '--settings']
         for opt in BaseCommand.option_list:
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
