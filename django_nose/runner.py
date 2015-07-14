@@ -20,7 +20,6 @@ from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
 from django.db import connections, transaction, DEFAULT_DB_ALIAS, models
-from django.db.backends.creation import BaseDatabaseCreation
 from django.utils.importlib import import_module
 
 import nose.core
@@ -34,6 +33,11 @@ try:
     from django.test.runner import DiscoverRunner as BaseRunner
 except ImportError:
     from django.test.simple import DjangoTestSuiteRunner as BaseRunner
+
+try:
+    from django.db.backends.creation import BaseDatabaseCreation
+except ImportError:
+    from django.db.backends.base.creation import BaseDatabaseCreation
 
 try:
     any
