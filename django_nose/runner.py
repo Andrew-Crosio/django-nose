@@ -103,6 +103,9 @@ def _get_plugins_from_settings():
 
         yield p_class()
 
+CONFLICTING_SHORT_OPTIONS = ['-v']
+CONFLICTING_LONG_OPTIONS = ['--verbosity']
+
 
 def _get_options():
     """Return all nose options that don't conflict with django options."""
@@ -128,8 +131,14 @@ def _get_options():
     plugins_option._short_opts.remove('-p')
 
     django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version']
-    return tuple(o for o in options if o.dest not in django_opts and
-                                       o.action != 'help')
+
+    return tuple(
+        o for o in options
+        if o.dest not in django_opts
+        and o.action != 'help'
+        and (not o._short_opts or o._short_opts[0] not in CONFLICTING_SHORT_OPTIONS)
+        and (not o._long_opts or o._long_opts[0] not in CONFLICTING_LONG_OPTIONS)
+    )
 
 
 class BasicNoseRunner(BaseRunner):
