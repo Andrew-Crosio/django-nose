@@ -251,7 +251,7 @@ def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
             connection.close()
 
 
-def _skip_create_test_db(self, verbosity=1, autoclobber=False, serialize=None):
+def _skip_create_test_db(self, verbosity=1, autoclobber=False, serialize=None, keepdb=None):
     """``create_test_db`` implementation that skips both creation and flushing
 
     The idea is to re-use the perfectly good test DB already created by an
@@ -389,12 +389,20 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 # starts using commit_unless_managed() for individual
                 # connections. Backwards compatibility for Django 1.2 is to use
                 # the generic transaction function.
-                transaction.commit_unless_managed(using=connection.alias)
+                try:
+                    transaction.commit_unless_managed(using=connection.alias)
+                except AttributeError:
+                    # commit_unless_managed has been removed from Django 1.8
+                    transaction.commit(using=connection.alias)
 
                 # Each connection has its own creation object, so this affects
                 # only a single connection:
-                creation.create_test_db = MethodType(
+                try:
+                    creation.create_test_db = MethodType(
                         _skip_create_test_db, creation, creation.__class__)
+                except TypeError:
+                    # Python 3 compatibility
+                    creation.create_test_db = MethodType(_skip_create_test_db, creation)
 
         Command.handle = _foreign_key_ignoring_handle
 
